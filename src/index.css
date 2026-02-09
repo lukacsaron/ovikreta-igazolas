@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* --- Dark mode base overrides--- */
+@custom-variant dark (&:where(.dark, .dark *));
+
 .signature-ink {
     filter: brightness(0) saturate(100%) invert(20%) sepia(60%) saturate(2500%) hue-rotate(235deg) brightness(85%);
 }
@@ -8,7 +11,9 @@
     color: #3b2d8b;
 }
 
-/* QR modal animations */
+/* ===== Animations ===== */
+
+/* Fade in */
 @keyframes fade-in {
     from {
         opacity: 0;
@@ -19,6 +24,7 @@
     }
 }
 
+/* Scale in (modals) */
 @keyframes scale-in {
     from {
         opacity: 0;
@@ -31,10 +37,67 @@
     }
 }
 
+/* Toast slide-down */
+@keyframes slide-down {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* Button shake */
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    15% {
+        transform: translateX(-6px);
+    }
+
+    30% {
+        transform: translateX(5px);
+    }
+
+    45% {
+        transform: translateX(-4px);
+    }
+
+    60% {
+        transform: translateX(3px);
+    }
+
+    75% {
+        transform: translateX(-2px);
+    }
+}
+
 .animate-fade-in {
     animation: fade-in 0.2s ease-out forwards;
 }
 
 .animate-scale-in {
     animation: scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-slide-down {
+    animation: slide-down 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+/* ===== Safe area ===== */
+@supports (padding: env(safe-area-inset-bottom)) {
+    .min-h-\[100dvh\] {
+        min-height: 100dvh;
+    }
 }
