@@ -1,0 +1,330 @@
+import React, { useState, useRef } from 'react';
+
+const signatures = [
+  // Signature 1 - flowing cursive
+  <svg key="sig1" viewBox="0 0 200 60" className="w-full h-full">
+    <path d="M10,45 Q30,20 50,35 T90,30 Q110,25 130,40 T170,35 Q185,30 190,40" 
+          fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+    <path d="M60,50 Q70,45 80,50" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>,
+  // Signature 2 - angular style
+  <svg key="sig2" viewBox="0 0 200 60" className="w-full h-full">
+    <path d="M15,40 L35,20 L55,45 L75,25 L95,40 L115,20 L135,45 L155,30 L180,35" 
+          fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M140,48 L160,48" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>,
+  // Signature 3 - loopy style
+  <svg key="sig3" viewBox="0 0 200 60" className="w-full h-full">
+    <path d="M10,35 Q25,10 40,35 Q55,60 70,35 Q85,10 100,35 Q115,60 130,35 Q145,20 160,30 Q175,40 190,30" 
+          fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+  </svg>,
+  // Signature 4 - simple elegant
+  <svg key="sig4" viewBox="0 0 200 60" className="w-full h-full">
+    <path d="M20,45 C40,45 50,15 80,25 S120,50 150,30 S170,20 185,35" 
+          fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+    <path d="M85,45 Q95,50 105,45" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <circle cx="175" cy="45" r="2" fill="currentColor"/>
+  </svg>,
+  // Signature 5 - dramatic flourish
+  <svg key="sig5" viewBox="0 0 200 60" className="w-full h-full">
+    <path d="M10,30 Q30,50 50,30 T90,30 Q120,10 140,35 Q160,55 180,25 L190,30" 
+          fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+    <path d="M180,25 Q190,15 195,25" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M50,50 Q60,55 70,50" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round"/>
+  </svg>
+];
+
+export default function ParentalAbsenceForm() {
+  const [childName, setChildName] = useState('');
+  const [kindergartenName, setKindergartenName] = useState('');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
+  const [selectedSignature, setSelectedSignature] = useState(null);
+  const [signatureDate, setSignatureDate] = useState(new Date().toISOString().split('T')[0]);
+  const printRef = useRef();
+
+  const formatDateHungarian = (dateStr) => {
+    if (!dateStr) return { month: '...............', day: '......' };
+    const date = new Date(dateStr);
+    const months = ['január', 'február', 'március', 'április', 'május', 'június', 
+                    'július', 'augusztus', 'szeptember', 'október', 'november', 'december'];
+    return {
+      month: months[date.getMonth()],
+      day: date.getDate().toString()
+    };
+  };
+
+  const formatYear = (dateStr) => {
+    if (!dateStr) return '....';
+    return new Date(dateStr).getFullYear().toString().slice(-2);
+  };
+
+  const fromFormatted = formatDateHungarian(fromDate);
+  const toFormatted = formatDateHungarian(toDate);
+  const sigDateFormatted = formatDateHungarian(signatureDate);
+
+  const handlePrint = () => {
+    const printContent = printRef.current;
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Szülői Igazolás</title>
+          <style>
+            @page { size: A4; margin: 20mm; }
+            body { 
+              font-family: 'Times New Roman', serif; 
+              padding: 40px;
+              max-width: 700px;
+              margin: 0 auto;
+            }
+            .header { text-align: center; margin-bottom: 30px; }
+            .logo { font-weight: bold; font-size: 18px; color: #666; margin-bottom: 10px; }
+            .title { font-size: 20px; font-weight: bold; text-decoration: underline; margin: 20px 0; }
+            .kindergarten-line { 
+              border-bottom: 1px dotted #333; 
+              min-width: 300px; 
+              display: inline-block; 
+              text-align: center;
+              padding: 5px 20px;
+              margin-bottom: 5px;
+            }
+            .small-label { font-size: 12px; color: #666; }
+            .content { line-height: 2; margin: 30px 0; font-size: 14px; }
+            .child-name { 
+              border-bottom: 1px dotted #333; 
+              min-width: 250px; 
+              display: inline-block;
+              padding: 0 10px;
+            }
+            .date-section { margin: 20px 0; }
+            .footer { margin-top: 60px; display: flex; justify-content: space-between; align-items: flex-end; }
+            .footer-left { }
+            .footer-right { text-align: center; }
+            .signature-line { 
+              border-bottom: 1px dotted #333; 
+              width: 200px; 
+              height: 50px;
+              display: flex;
+              align-items: flex-end;
+              justify-content: center;
+              padding-bottom: 5px;
+            }
+            .signature-label { font-size: 12px; color: #666; margin-top: 5px; }
+            .signature-svg { width: 180px; height: 45px; color: #1a365d; }
+          </style>
+        </head>
+        <body>
+          ${printContent.innerHTML}
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.onload = () => {
+      printWindow.print();
+    };
+  };
+
+  const isFormComplete = childName && fromDate && toDate && selectedSignature !== null;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 p-4 md:p-8">
+      <div className="max-w-5xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur px-6 py-3 rounded-full shadow-sm">
+            <span className="text-2xl">📝</span>
+            <h1 className="text-xl font-semibold text-gray-800">Szülői Igazolás Kitöltő</h1>
+          </div>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-6">
+          {/* Form Panel */}
+          <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 order-2 lg:order-1">
+            <h2 className="text-lg font-medium text-gray-700 mb-6 flex items-center gap-2">
+              <span className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 text-sm font-bold">1</span>
+              Adatok kitöltése
+            </h2>
+
+            {/* Kindergarten Name */}
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-gray-600 mb-2">Óvoda neve</label>
+              <input
+                type="text"
+                value={kindergartenName}
+                onChange={(e) => setKindergartenName(e.target.value)}
+                placeholder="pl. Napraforgó Óvoda"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-200 focus:border-amber-400 outline-none transition-all"
+              />
+            </div>
+
+            {/* Child Name */}
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-gray-600 mb-2">Gyermek neve</label>
+              <input
+                type="text"
+                value={childName}
+                onChange={(e) => setChildName(e.target.value)}
+                placeholder="pl. Kis Péter"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-200 focus:border-amber-400 outline-none transition-all"
+              />
+            </div>
+
+            {/* Date Range */}
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-gray-600 mb-2">Hiányzás időszaka</label>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <span className="text-xs text-gray-400 mb-1 block">-tól</span>
+                  <input
+                    type="date"
+                    value={fromDate}
+                    onChange={(e) => setFromDate(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-200 focus:border-amber-400 outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <span className="text-xs text-gray-400 mb-1 block">-ig</span>
+                  <input
+                    type="date"
+                    value={toDate}
+                    onChange={(e) => setToDate(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-200 focus:border-amber-400 outline-none transition-all"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Signature Date */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-600 mb-2">Aláírás dátuma</label>
+              <input
+                type="date"
+                value={signatureDate}
+                onChange={(e) => setSignatureDate(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-200 focus:border-amber-400 outline-none transition-all"
+              />
+            </div>
+
+            {/* Signature Selection */}
+            <div className="mb-6">
+              <h3 className="text-lg font-medium text-gray-700 mb-4 flex items-center gap-2">
+                <span className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 text-sm font-bold">2</span>
+                Aláírás kiválasztása
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {signatures.map((sig, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setSelectedSignature(idx)}
+                    className={`p-4 border-2 rounded-xl transition-all hover:shadow-md ${
+                      selectedSignature === idx 
+                        ? 'border-amber-400 bg-amber-50 shadow-md' 
+                        : 'border-gray-200 bg-white hover:border-amber-200'
+                    }`}
+                  >
+                    <div className="h-10 text-gray-700">
+                      {sig}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Download Button */}
+            <button
+              onClick={handlePrint}
+              disabled={!isFormComplete}
+              className={`w-full py-4 rounded-xl font-medium text-lg transition-all flex items-center justify-center gap-2 ${
+                isFormComplete
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg hover:shadow-xl hover:scale-[1.02]'
+                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              }`}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Letöltés PDF-ként
+            </button>
+            {!isFormComplete && (
+              <p className="text-center text-sm text-gray-400 mt-2">
+                Kérlek töltsd ki az összes mezőt és válassz aláírást
+              </p>
+            )}
+          </div>
+
+          {/* Preview Panel */}
+          <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 order-1 lg:order-2">
+            <h2 className="text-lg font-medium text-gray-700 mb-4 flex items-center gap-2">
+              <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              Előnézet
+            </h2>
+
+            {/* Document Preview */}
+            <div ref={printRef} className="border border-gray-200 rounded-xl p-6 bg-white font-serif text-sm">
+              <div className="text-center mb-6">
+                <div className="text-gray-500 font-bold tracking-wide mb-4">OVIKRÉTA</div>
+                <h3 className="text-lg font-bold underline">SZÜLŐI IGAZOLÁS</h3>
+              </div>
+
+              <div className="text-center mb-6">
+                <div className="inline-block border-b border-dotted border-gray-400 min-w-[200px] px-4 py-1">
+                  {kindergartenName || <span className="text-gray-300">óvoda neve</span>}
+                </div>
+                <div className="text-xs text-gray-400 mt-1">óvoda neve</div>
+              </div>
+
+              <div className="leading-relaxed mb-4">
+                <p>
+                  Alulírott szülő (gondviselő, gyám) ezúton igazolom, hogy gyermekem{' '}
+                  <span className="inline-block border-b border-dotted border-gray-400 min-w-[150px] px-2 text-center">
+                    {childName || <span className="text-gray-300">gyermek neve</span>}
+                  </span>
+                </p>
+              </div>
+
+              <p className="mb-4">az alábbi időszakban hiányzott az óvodából:</p>
+
+              <p className="mb-6">
+                202<span className="inline-block border-b border-dotted border-gray-400 min-w-[20px] px-1 text-center">{formatYear(fromDate)}</span>{' '}
+                <span className="inline-block border-b border-dotted border-gray-400 min-w-[80px] px-2 text-center">{fromFormatted.month}</span> hó{' '}
+                <span className="inline-block border-b border-dotted border-gray-400 min-w-[30px] px-1 text-center">{fromFormatted.day}</span>. napjától –{' '}
+                <span className="inline-block border-b border-dotted border-gray-400 min-w-[80px] px-2 text-center">{toFormatted.month}</span> hó{' '}
+                <span className="inline-block border-b border-dotted border-gray-400 min-w-[30px] px-1 text-center">{toFormatted.day}</span>. napjáig.
+              </p>
+
+              <div className="flex justify-between items-end mt-10">
+                <div>
+                  <p>
+                    Budapest, 202<span className="inline-block border-b border-dotted border-gray-400 min-w-[20px] px-1 text-center">{formatYear(signatureDate)}</span>.{' '}
+                    <span className="inline-block border-b border-dotted border-gray-400 min-w-[80px] px-2 text-center">{sigDateFormatted.month}</span>{' '}
+                    <span className="inline-block border-b border-dotted border-gray-400 min-w-[30px] px-1 text-center">{sigDateFormatted.day}</span>.
+                  </p>
+                </div>
+                <div className="text-center">
+                  <div className="signature-line border-b border-dotted border-gray-400 w-48 h-12 flex items-end justify-center pb-1">
+                    {selectedSignature !== null && (
+                      <div className="w-44 h-10 text-blue-900 signature-svg">
+                        {signatures[selectedSignature]}
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">Szülő (gondviselő, gyám) aláírása</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="text-center mt-8 text-gray-400 text-sm">
+          Készítsd el gyorsan és egyszerűen a szülői igazolást 📄
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+.signature-ink {
+    filter: brightness(0) saturate(100%) invert(20%) sepia(60%) saturate(2500%) hue-rotate(235deg) brightness(85%);
+}
+
+.signature-ink-text {
+    color: #3b2d8b;
+}
