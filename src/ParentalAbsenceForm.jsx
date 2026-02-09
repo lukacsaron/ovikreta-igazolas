@@ -115,17 +115,17 @@ async function renderSignatureToImage(selSig, sigs, customName, font, drawnSig) 
     return canvas.toDataURL('image/png');
   }
 
-  // SVG image signature
+  // SVG image signature (1.5x bigger, shifted down to sit on the line)
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
-      // Draw the SVG
+      // Draw the SVG at 1.5x scale
       const aspectRatio = img.naturalWidth / img.naturalHeight;
-      const drawH = 80;
+      const drawH = 90;
       const drawW = drawH * aspectRatio;
       const x = (400 - drawW) / 2;
-      const y = (100 - drawH) / 2;
+      const y = (100 - drawH) / 2 + 8;
       ctx.drawImage(img, x, y, drawW, drawH);
 
       // Apply ink-blue tint via composite
@@ -154,6 +154,7 @@ export default function ParentalAbsenceForm() {
   const [signatureDate, setSignatureDate] = useState(saved.signatureDate || new Date().toISOString().split('T')[0]);
   const [drawnSignature, setDrawnSignature] = useState(saved.drawnSignature || null);
   const [showQRModal, setShowQRModal] = useState(false);
+  const [showDesktopPad, setShowDesktopPad] = useState(false);
   const isMobile = useMemo(() => isMobileDevice(), []);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -519,7 +520,6 @@ export default function ParentalAbsenceForm() {
                 <button
                   onClick={() => {
                     setSelectedSignature('drawn');
-                    if (!isMobile && !drawnSignature) setShowQRModal(true);
                   }}
                   className={`p-4 border-2 rounded-xl transition-all hover:shadow-md ${selectedSignature === 'drawn'
                     ? 'border-amber-400 bg-amber-50 shadow-md'
@@ -595,7 +595,7 @@ export default function ParentalAbsenceForm() {
                       />
                     </div>
                   ) : (
-                    /* Desktop: QR trigger or show existing */
+                    /* Desktop: QR trigger, mouse sign, or show existing */
                     <div className="space-y-3">
                       {drawnSignature ? (
                         <div className="flex items-center gap-3">
@@ -604,20 +604,43 @@ export default function ParentalAbsenceForm() {
                             <span className="text-sm text-green-700 font-medium">Aláírás rögzítve ✓</span>
                           </div>
                           <button
-                            onClick={() => { setDrawnSignature(null); setShowQRModal(true); }}
+                            onClick={() => setDrawnSignature(null)}
                             className="px-3 py-2 text-xs text-gray-500 hover:text-amber-600 border border-gray-200 hover:border-amber-300 rounded-xl transition-all"
                           >
                             Újra
                           </button>
                         </div>
+                      ) : showDesktopPad ? (
+                        <div className="space-y-3">
+                          <p className="text-xs text-gray-500">Írja alá egérrel az alábbi mezőben:</p>
+                          <SignaturePad
+                            onSignatureChange={(dataUrl) => setDrawnSignature(dataUrl)}
+                            compact
+                          />
+                          <button
+                            onClick={() => setShowDesktopPad(false)}
+                            className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                          >
+                            ← Vissza a lehetőségekhez
+                          </button>
+                        </div>
                       ) : (
-                        <button
-                          onClick={() => setShowQRModal(true)}
-                          className="w-full py-3 px-4 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-dashed border-amber-300 rounded-xl text-amber-700 font-medium text-sm hover:shadow-md transition-all flex items-center justify-center gap-2"
-                        >
-                          <span className="text-lg">📱</span>
-                          QR kód megjelenítése az aláíráshoz
-                        </button>
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            onClick={() => setShowDesktopPad(true)}
+                            className="py-3 px-4 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-dashed border-amber-300 rounded-xl text-amber-700 font-medium text-sm hover:shadow-md transition-all flex flex-col items-center justify-center gap-1.5"
+                          >
+                            <span className="text-lg">�️</span>
+                            Aláírás egérrel
+                          </button>
+                          <button
+                            onClick={() => setShowQRModal(true)}
+                            className="py-3 px-4 bg-gradient-to-r from-orange-50 to-amber-50 border-2 border-dashed border-amber-300 rounded-xl text-amber-700 font-medium text-sm hover:shadow-md transition-all flex flex-col items-center justify-center gap-1.5"
+                          >
+                            <span className="text-lg">📱</span>
+                            Aláírás telefonon
+                          </button>
+                        </div>
                       )}
                     </div>
                   )}
@@ -705,9 +728,9 @@ export default function ParentalAbsenceForm() {
                   </p>
                 </div>
                 <div className="text-center">
-                  <div className="signature-line border-b border-dotted border-gray-400 w-48 h-12 flex items-end justify-center pb-1">
+                  <div className="signature-line border-b border-dotted border-gray-400 w-48 h-12 flex items-end justify-center pb-1 relative overflow-visible">
                     {selectedSignature !== null && selectedSignature !== 'custom' && selectedSignature !== 'drawn' && (
-                      <div className="w-44 h-10 signature-svg">
+                      <div className="absolute left-1/2 -translate-x-1/2 w-[66px] h-[60px] signature-svg" style={{ bottom: '-8px' }}>
                         <img src={signatures[selectedSignature].src} alt={signatures[selectedSignature].alt} className="w-full h-full object-contain signature-ink" />
                       </div>
                     )}

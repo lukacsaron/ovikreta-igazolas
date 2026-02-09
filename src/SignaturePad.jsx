@@ -99,7 +99,8 @@ export default function SignaturePad({ onSignatureChange, className = '', compac
     }, [getPos]);
 
     const endStroke = useCallback(() => {
-        if (!isDrawing) return;
+        if (!isDrawingRef.current) return;
+        isDrawingRef.current = false;
         setIsDrawing(false);
         setHasStrokes(true);
         lastPointRef.current = null;
