@@ -3,34 +3,34 @@ import React, { useState, useRef } from 'react';
 const signatures = [
   // Signature 1 - flowing cursive
   <svg key="sig1" viewBox="0 0 200 60" className="w-full h-full">
-    <path d="M10,45 Q30,20 50,35 T90,30 Q110,25 130,40 T170,35 Q185,30 190,40" 
-          fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-    <path d="M60,50 Q70,45 80,50" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M10,45 Q30,20 50,35 T90,30 Q110,25 130,40 T170,35 Q185,30 190,40"
+      fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M60,50 Q70,45 80,50" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
   </svg>,
   // Signature 2 - angular style
   <svg key="sig2" viewBox="0 0 200 60" className="w-full h-full">
-    <path d="M15,40 L35,20 L55,45 L75,25 L95,40 L115,20 L135,45 L155,30 L180,35" 
-          fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M140,48 L160,48" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M15,40 L35,20 L55,45 L75,25 L95,40 L115,20 L135,45 L155,30 L180,35"
+      fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M140,48 L160,48" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
   </svg>,
   // Signature 3 - loopy style
   <svg key="sig3" viewBox="0 0 200 60" className="w-full h-full">
-    <path d="M10,35 Q25,10 40,35 Q55,60 70,35 Q85,10 100,35 Q115,60 130,35 Q145,20 160,30 Q175,40 190,30" 
-          fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+    <path d="M10,35 Q25,10 40,35 Q55,60 70,35 Q85,10 100,35 Q115,60 130,35 Q145,20 160,30 Q175,40 190,30"
+      fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
   </svg>,
   // Signature 4 - simple elegant
   <svg key="sig4" viewBox="0 0 200 60" className="w-full h-full">
-    <path d="M20,45 C40,45 50,15 80,25 S120,50 150,30 S170,20 185,35" 
-          fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-    <path d="M85,45 Q95,50 105,45" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <circle cx="175" cy="45" r="2" fill="currentColor"/>
+    <path d="M20,45 C40,45 50,15 80,25 S120,50 150,30 S170,20 185,35"
+      fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M85,45 Q95,50 105,45" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    <circle cx="175" cy="45" r="2" fill="currentColor" />
   </svg>,
   // Signature 5 - dramatic flourish
   <svg key="sig5" viewBox="0 0 200 60" className="w-full h-full">
-    <path d="M10,30 Q30,50 50,30 T90,30 Q120,10 140,35 Q160,55 180,25 L190,30" 
-          fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-    <path d="M180,25 Q190,15 195,25" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M50,50 Q60,55 70,50" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round"/>
+    <path d="M10,30 Q30,50 50,30 T90,30 Q120,10 140,35 Q160,55 180,25 L190,30"
+      fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M180,25 Q190,15 195,25" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    <path d="M50,50 Q60,55 70,50" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
   </svg>
 ];
 
@@ -46,8 +46,8 @@ export default function ParentalAbsenceForm() {
   const formatDateHungarian = (dateStr) => {
     if (!dateStr) return { month: '...............', day: '......' };
     const date = new Date(dateStr);
-    const months = ['január', 'február', 'március', 'április', 'május', 'június', 
-                    'július', 'augusztus', 'szeptember', 'október', 'november', 'december'];
+    const months = ['január', 'február', 'március', 'április', 'május', 'június',
+      'július', 'augusztus', 'szeptember', 'október', 'november', 'december'];
     return {
       month: months[date.getMonth()],
       day: date.getDate().toString()
@@ -218,11 +218,10 @@ export default function ParentalAbsenceForm() {
                   <button
                     key={idx}
                     onClick={() => setSelectedSignature(idx)}
-                    className={`p-4 border-2 rounded-xl transition-all hover:shadow-md ${
-                      selectedSignature === idx 
-                        ? 'border-amber-400 bg-amber-50 shadow-md' 
-                        : 'border-gray-200 bg-white hover:border-amber-200'
-                    }`}
+                    className={`p-4 border-2 rounded-xl transition-all hover:shadow-md ${selectedSignature === idx
+                      ? 'border-amber-400 bg-amber-50 shadow-md'
+                      : 'border-gray-200 bg-white hover:border-amber-200'
+                      }`}
                   >
                     <div className="h-10 text-gray-700">
                       {sig}
@@ -236,11 +235,10 @@ export default function ParentalAbsenceForm() {
             <button
               onClick={handlePrint}
               disabled={!isFormComplete}
-              className={`w-full py-4 rounded-xl font-medium text-lg transition-all flex items-center justify-center gap-2 ${
-                isFormComplete
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg hover:shadow-xl hover:scale-[1.02]'
-                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              }`}
+              className={`w-full py-4 rounded-xl font-medium text-lg transition-all flex items-center justify-center gap-2 ${isFormComplete
+                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg hover:shadow-xl hover:scale-[1.02]'
+                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                }`}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -290,7 +288,7 @@ export default function ParentalAbsenceForm() {
               <p className="mb-4">az alábbi időszakban hiányzott az óvodából:</p>
 
               <p className="mb-6">
-                202<span className="inline-block border-b border-dotted border-gray-400 min-w-[20px] px-1 text-center">{formatYear(fromDate)}</span>{' '}
+                20<span className="inline-block border-b border-dotted border-gray-400 min-w-[20px] px-1 text-center">{formatYear(fromDate)}</span>{' '}
                 <span className="inline-block border-b border-dotted border-gray-400 min-w-[80px] px-2 text-center">{fromFormatted.month}</span> hó{' '}
                 <span className="inline-block border-b border-dotted border-gray-400 min-w-[30px] px-1 text-center">{fromFormatted.day}</span>. napjától –{' '}
                 <span className="inline-block border-b border-dotted border-gray-400 min-w-[80px] px-2 text-center">{toFormatted.month}</span> hó{' '}
@@ -300,7 +298,7 @@ export default function ParentalAbsenceForm() {
               <div className="flex justify-between items-end mt-10">
                 <div>
                   <p>
-                    Budapest, 202<span className="inline-block border-b border-dotted border-gray-400 min-w-[20px] px-1 text-center">{formatYear(signatureDate)}</span>.{' '}
+                    Budapest, 20<span className="inline-block border-b border-dotted border-gray-400 min-w-[20px] px-1 text-center">{formatYear(signatureDate)}</span>.{' '}
                     <span className="inline-block border-b border-dotted border-gray-400 min-w-[80px] px-2 text-center">{sigDateFormatted.month}</span>{' '}
                     <span className="inline-block border-b border-dotted border-gray-400 min-w-[30px] px-1 text-center">{sigDateFormatted.day}</span>.
                   </p>

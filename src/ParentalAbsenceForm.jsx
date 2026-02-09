@@ -224,7 +224,7 @@ export default function ParentalAbsenceForm() {
 
   const formatYear = (dateStr) => {
     if (!dateStr) return '....';
-    return new Date(dateStr).getFullYear().toString().slice(-2);
+    return new Date(dateStr).getFullYear().toString();
   };
 
   const fromFormatted = formatDateHungarian(fromDate);
@@ -834,7 +834,7 @@ export default function ParentalAbsenceForm() {
                 <p className="mb-4">az alábbi időszakban hiányzott az óvodából:</p>
 
                 <p className="mb-6">
-                  202<span className="inline-block border-b border-dotted border-gray-400 min-w-[20px] px-1 text-center">{formatYear(fromDate)}</span>{' '}
+                  <span className="inline-block border-b border-dotted border-gray-400 min-w-[30px] px-1 text-center">{formatYear(fromDate)}</span>.{' '}
                   <span className="inline-block border-b border-dotted border-gray-400 min-w-[80px] px-2 text-center">{fromFormatted.month}</span> hó{' '}
                   <span className="inline-block border-b border-dotted border-gray-400 min-w-[30px] px-1 text-center">{fromFormatted.day}</span>. napjától –{' '}
                   <span className="inline-block border-b border-dotted border-gray-400 min-w-[80px] px-2 text-center">{toFormatted.month}</span> hó{' '}
@@ -844,7 +844,7 @@ export default function ParentalAbsenceForm() {
                 <div className="flex justify-between items-end mt-10">
                   <div>
                     <p>
-                      Budapest, 202<span className="inline-block border-b border-dotted border-gray-400 min-w-[20px] px-1 text-center">{formatYear(signatureDate)}</span>.{' '}
+                      Budapest, <span className="inline-block border-b border-dotted border-gray-400 min-w-[30px] px-1 text-center">{formatYear(signatureDate)}</span>.{' '}
                       <span className="inline-block border-b border-dotted border-gray-400 min-w-[80px] px-2 text-center">{sigDateFormatted.month}</span>{' '}
                       <span className="inline-block border-b border-dotted border-gray-400 min-w-[30px] px-1 text-center">{sigDateFormatted.day}</span>.
                     </p>
