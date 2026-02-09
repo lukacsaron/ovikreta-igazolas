@@ -1,4 +1,12 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import SignaturePad from './SignaturePad';
+import QRSignatureModal from './QRSignatureModal';
+
+// Mobile detection
+function isMobileDevice() {
+  return /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    || (navigator.maxTouchPoints > 1 && window.innerWidth < 768);
+}
 
 // --- Cookie helpers ---
 function setCookie(name, value, days = 365) {
@@ -53,12 +61,15 @@ export default function ParentalAbsenceForm() {
   const [customSignatureName, setCustomSignatureName] = useState(saved.customSignatureName || '');
   const [selectedFont, setSelectedFont] = useState(saved.selectedFont ?? 0);
   const [signatureDate, setSignatureDate] = useState(saved.signatureDate || new Date().toISOString().split('T')[0]);
+  const [drawnSignature, setDrawnSignature] = useState(saved.drawnSignature || null);
+  const [showQRModal, setShowQRModal] = useState(false);
+  const isMobile = useMemo(() => isMobileDevice(), []);
   const printRef = useRef();
 
   // Persist all fields to sessionStorage on every change
   useEffect(() => {
-    saveSession({ childName, kindergartenName, fromDate, toDate, selectedSignature, customSignatureName, selectedFont, signatureDate });
-  }, [childName, kindergartenName, fromDate, toDate, selectedSignature, customSignatureName, selectedFont, signatureDate]);
+    saveSession({ childName, kindergartenName, fromDate, toDate, selectedSignature, customSignatureName, selectedFont, signatureDate, drawnSignature });
+  }, [childName, kindergartenName, fromDate, toDate, selectedSignature, customSignatureName, selectedFont, signatureDate, drawnSignature]);
 
   // Persist childName to cookie specifically
   useEffect(() => {
@@ -139,6 +150,7 @@ export default function ParentalAbsenceForm() {
             .signature-svg img { width: 100%; height: 100%; object-fit: contain; }
             .signature-ink { filter: brightness(0) saturate(100%) invert(20%) sepia(60%) saturate(2500%) hue-rotate(235deg) brightness(85%); }
             .signature-ink-text { color: #3b2d8b; }
+            .signature-drawn img { width: 100%; height: 100%; object-fit: contain; }
           </style>
         </head>
         <body>
@@ -152,7 +164,7 @@ export default function ParentalAbsenceForm() {
     };
   };
 
-  const isFormComplete = childName && fromDate && toDate && selectedSignature !== null && (selectedSignature !== 'custom' || customSignatureName.trim());
+  const isFormComplete = childName && fromDate && toDate && selectedSignature !== null && (selectedSignature !== 'custom' || customSignatureName.trim()) && (selectedSignature !== 'drawn' || drawnSignature);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 p-4 md:p-8">
@@ -266,6 +278,26 @@ export default function ParentalAbsenceForm() {
                     <span className="text-2xl">✍️</span>
                   </div>
                 </button>
+
+                {/* Drawn (hand) signature option */}
+                <button
+                  onClick={() => {
+                    setSelectedSignature('drawn');
+                    if (!isMobile && !drawnSignature) setShowQRModal(true);
+                  }}
+                  className={`p-4 border-2 rounded-xl transition-all hover:shadow-md ${selectedSignature === 'drawn'
+                    ? 'border-amber-400 bg-amber-50 shadow-md'
+                    : 'border-gray-200 bg-white hover:border-amber-200'
+                    }`}
+                >
+                  <div className="h-10 flex items-center justify-center">
+                    {drawnSignature ? (
+                      <img src={drawnSignature} alt="Kézzel rajzolt" className="h-full w-full object-contain" />
+                    ) : (
+                      <span className="text-2xl">🤳</span>
+                    )}
+                  </div>
+                </button>
               </div>
 
               {/* Custom signature input */}
@@ -288,8 +320,8 @@ export default function ParentalAbsenceForm() {
                             key={idx}
                             onClick={() => setSelectedFont(idx)}
                             className={`group relative px-4 py-3 border-2 rounded-xl transition-all text-left hover:shadow-md ${selectedFont === idx
-                                ? 'border-amber-400 bg-amber-50/80 shadow-md'
-                                : 'border-gray-100 bg-gray-50/50 hover:border-amber-200 hover:bg-white'
+                              ? 'border-amber-400 bg-amber-50/80 shadow-md'
+                              : 'border-gray-100 bg-gray-50/50 hover:border-amber-200 hover:bg-white'
                               }`}
                           >
                             <div className="flex items-center justify-between gap-3">
@@ -300,8 +332,8 @@ export default function ParentalAbsenceForm() {
                                 {customSignatureName}
                               </span>
                               <span className={`text-[10px] font-medium uppercase tracking-wider shrink-0 px-2 py-0.5 rounded-full ${selectedFont === idx
-                                  ? 'bg-amber-200/60 text-amber-700'
-                                  : 'bg-gray-100 text-gray-400 group-hover:bg-amber-100 group-hover:text-amber-600'
+                                ? 'bg-amber-200/60 text-amber-700'
+                                : 'bg-gray-100 text-gray-400 group-hover:bg-amber-100 group-hover:text-amber-600'
                                 }`}>
                                 {font.label}
                               </span>
@@ -309,6 +341,48 @@ export default function ParentalAbsenceForm() {
                           </button>
                         ))}
                       </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Drawn signature area */}
+              {selectedSignature === 'drawn' && (
+                <div className="mt-4">
+                  {isMobile ? (
+                    /* Mobile: inline signature pad */
+                    <div className="space-y-3">
+                      <p className="text-xs text-gray-500">Írja alá ujjával az alábbi mezőben:</p>
+                      <SignaturePad
+                        onSignatureChange={(dataUrl) => setDrawnSignature(dataUrl)}
+                        compact
+                      />
+                    </div>
+                  ) : (
+                    /* Desktop: QR trigger or show existing */
+                    <div className="space-y-3">
+                      {drawnSignature ? (
+                        <div className="flex items-center gap-3">
+                          <div className="flex-1 p-3 bg-green-50 rounded-xl border border-green-200 flex items-center gap-3">
+                            <img src={drawnSignature} alt="Aláírás" className="h-10 object-contain" />
+                            <span className="text-sm text-green-700 font-medium">Aláírás rögzítve ✓</span>
+                          </div>
+                          <button
+                            onClick={() => { setDrawnSignature(null); setShowQRModal(true); }}
+                            className="px-3 py-2 text-xs text-gray-500 hover:text-amber-600 border border-gray-200 hover:border-amber-300 rounded-xl transition-all"
+                          >
+                            Újra
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setShowQRModal(true)}
+                          className="w-full py-3 px-4 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-dashed border-amber-300 rounded-xl text-amber-700 font-medium text-sm hover:shadow-md transition-all flex items-center justify-center gap-2"
+                        >
+                          <span className="text-lg">📱</span>
+                          QR kód megjelenítése az aláíráshoz
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -389,7 +463,7 @@ export default function ParentalAbsenceForm() {
                 </div>
                 <div className="text-center">
                   <div className="signature-line border-b border-dotted border-gray-400 w-48 h-12 flex items-end justify-center pb-1">
-                    {selectedSignature !== null && selectedSignature !== 'custom' && (
+                    {selectedSignature !== null && selectedSignature !== 'custom' && selectedSignature !== 'drawn' && (
                       <div className="w-44 h-10 signature-svg">
                         <img src={signatures[selectedSignature].src} alt={signatures[selectedSignature].alt} className="w-full h-full object-contain signature-ink" />
                       </div>
@@ -399,6 +473,11 @@ export default function ParentalAbsenceForm() {
                         <span className="signature-ink-text" style={{ fontFamily: signatureFonts[selectedFont].family, fontSize: '1.25rem', lineHeight: 1 }}>
                           {customSignatureName}
                         </span>
+                      </div>
+                    )}
+                    {selectedSignature === 'drawn' && drawnSignature && (
+                      <div className="w-44 h-10 signature-drawn">
+                        <img src={drawnSignature} alt="Kézzel rajzolt aláírás" className="w-full h-full object-contain" />
                       </div>
                     )}
                   </div>
@@ -414,6 +493,17 @@ export default function ParentalAbsenceForm() {
           Készítsd el gyorsan és egyszerűen a szülői igazolást 📄
         </div>
       </div>
+
+      {/* QR Signature Modal */}
+      {showQRModal && (
+        <QRSignatureModal
+          onSignature={(dataUrl) => {
+            setDrawnSignature(dataUrl);
+            setShowQRModal(false);
+          }}
+          onClose={() => setShowQRModal(false)}
+        />
+      )}
     </div>
   );
 }
