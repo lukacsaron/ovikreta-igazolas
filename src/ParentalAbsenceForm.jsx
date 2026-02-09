@@ -598,7 +598,7 @@ export default function ParentalAbsenceForm() {
                       : `${hasAttemptedSubmit && selectedSignature === null ? 'border-red-200 dark:border-red-800' : 'border-gray-200 dark:border-gray-600'} bg-white dark:bg-gray-700 hover:border-amber-200 dark:hover:border-amber-600`
                       }`}
                   >
-                    <div className="h-10 flex items-center justify-center">
+                    <div className="h-10 flex items-center justify-center dark:bg-white/90 dark:rounded-lg dark:p-1">
                       <img src={sig.src} alt={sig.alt} className="h-full w-full object-contain signature-ink" />
                     </div>
                   </button>
