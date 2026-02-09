@@ -51,8 +51,52 @@ const signatureFonts = [
 
 // --- Signature-to-image helper for PDF embedding ---
 async function renderSignatureToImage(selSig, sigs, customName, font, drawnSig) {
-  // Drawn signature is already a data URL
-  if (selSig === 'drawn') return drawnSig;
+  // Drawn signature — trim whitespace and return clean PNG
+  if (selSig === 'drawn' && drawnSig) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        // Create a trimmed canvas (crop transparent edges)
+        const src = document.createElement('canvas');
+        src.width = img.naturalWidth;
+        src.height = img.naturalHeight;
+        const sCtx = src.getContext('2d');
+        sCtx.drawImage(img, 0, 0);
+
+        // Find bounding box of non-transparent pixels
+        const iData = sCtx.getImageData(0, 0, src.width, src.height).data;
+        let minX = src.width, maxX = 0, minY = src.height, maxY = 0;
+        for (let py = 0; py < src.height; py++) {
+          for (let px = 0; px < src.width; px++) {
+            if (iData[(py * src.width + px) * 4 + 3] > 10) {
+              minX = Math.min(minX, px);
+              maxX = Math.max(maxX, px);
+              minY = Math.min(minY, py);
+              maxY = Math.max(maxY, py);
+            }
+          }
+        }
+
+        if (maxX <= minX || maxY <= minY) { resolve(drawnSig); return; }
+
+        // Add padding
+        const pad = 10;
+        minX = Math.max(0, minX - pad);
+        minY = Math.max(0, minY - pad);
+        maxX = Math.min(src.width, maxX + pad);
+        maxY = Math.min(src.height, maxY + pad);
+
+        const out = document.createElement('canvas');
+        out.width = maxX - minX;
+        out.height = maxY - minY;
+        const oCtx = out.getContext('2d');
+        oCtx.drawImage(src, minX, minY, out.width, out.height, 0, 0, out.width, out.height);
+        resolve(out.toDataURL('image/png'));
+      };
+      img.onerror = () => resolve(drawnSig);
+      img.src = drawnSig;
+    });
+  }
 
   const canvas = document.createElement('canvas');
   const dpr = 2; // retina-quality
@@ -320,7 +364,27 @@ export default function ParentalAbsenceForm() {
             signatureFonts[selectedFont], drawnSignature
           );
           if (sigDataUrl) {
-            doc.addImage(sigDataUrl, 'PNG', sigX + 2, sigLineY - 16, 51, 14);
+            // Load image to get aspect ratio for proper sizing
+            const sigImg = await new Promise((res) => {
+              const i = new Image();
+              i.onload = () => res(i);
+              i.onerror = () => res(null);
+              i.src = sigDataUrl;
+            });
+            const maxW = 55, maxH = 22;
+            let imgW = maxW, imgH = maxH;
+            if (sigImg && sigImg.naturalWidth && sigImg.naturalHeight) {
+              const ar = sigImg.naturalWidth / sigImg.naturalHeight;
+              if (ar > maxW / maxH) {
+                imgW = maxW;
+                imgH = maxW / ar;
+              } else {
+                imgH = maxH;
+                imgW = maxH * ar;
+              }
+            }
+            const imgX = sigX + (55 - imgW) / 2;
+            doc.addImage(sigDataUrl, 'PNG', imgX, sigLineY - imgH - 1, imgW, imgH);
           }
         } catch (e) {
           console.warn('Failed to embed signature:', e);

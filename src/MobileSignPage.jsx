@@ -51,7 +51,7 @@ export default function MobileSignPage({ targetPeerId }) {
     };
 
     return (
-        <div className="fixed inset-0 bg-gradient-to-b from-amber-50 via-orange-50 to-yellow-50 flex flex-col overflow-hidden" style={{ touchAction: 'none' }}>
+        <div className="min-h-[100dvh] bg-gradient-to-b from-amber-50 via-orange-50 to-yellow-50 flex flex-col overflow-y-auto" style={{ touchAction: 'pan-y' }}>
             {/* Header */}
             <div className="flex-shrink-0 px-6 pt-8 pb-4 text-center">
                 <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur px-5 py-2.5 rounded-full shadow-sm mb-3">
@@ -89,8 +89,8 @@ export default function MobileSignPage({ targetPeerId }) {
                             onClick={sendSignature}
                             disabled={!signatureDataUrl || status === 'sending'}
                             className={`w-full py-4 rounded-2xl font-semibold text-lg transition-all flex items-center justify-center gap-2 ${signatureDataUrl && status !== 'sending'
-                                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg active:scale-[0.98]'
-                                    : 'bg-gray-100 text-gray-400'
+                                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg active:scale-[0.98]'
+                                : 'bg-gray-100 text-gray-400'
                                 }`}
                         >
                             {status === 'sending' ? (
@@ -146,9 +146,12 @@ export default function MobileSignPage({ targetPeerId }) {
                 </div>
             )}
 
-            {/* iOS overscroll prevention */}
+            {/* iOS overscroll prevention — allow vertical scroll */}
             <style>{`
-        html, body { overflow: hidden; position: fixed; width: 100%; height: 100%; }
+        html, body { overflow-x: hidden; width: 100%; }
+        @media (orientation: landscape) and (max-height: 500px) {
+          html, body { overflow-y: auto !important; height: auto !important; }
+        }
       `}</style>
         </div>
     );

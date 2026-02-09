@@ -34,6 +34,7 @@ export default function SignaturePad({ onSignatureChange, className = '', compac
 
             const ctx = canvas.getContext('2d');
             ctx.scale(dpr, dpr);
+            ctx.setLineDash([]);
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
             ctx.strokeStyle = '#3b2d8b';
@@ -57,6 +58,12 @@ export default function SignaturePad({ onSignatureChange, className = '', compac
     const startStroke = useCallback((e) => {
         e.preventDefault();
         const pos = getPos(e);
+        const ctx = canvasRef.current.getContext('2d');
+        ctx.setLineDash([]);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = '#3b2d8b';
+        ctx.lineWidth = 2.5;
         setIsDrawing(true);
         lastPointRef.current = pos;
         pointsRef.current = [pos];
@@ -69,6 +76,13 @@ export default function SignaturePad({ onSignatureChange, className = '', compac
         const ctx = canvasRef.current.getContext('2d');
         const pos = getPos(e);
         const last = lastPointRef.current;
+
+        // Ensure solid strokes (canvas ctx resets on resize)
+        ctx.setLineDash([]);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = '#3b2d8b';
+        ctx.lineWidth = 2.5;
 
         // Quadratic Bézier for smooth curves
         const mid = { x: (last.x + pos.x) / 2, y: (last.y + pos.y) / 2 };
@@ -107,7 +121,7 @@ export default function SignaturePad({ onSignatureChange, className = '', compac
     return (
         <div ref={containerRef} className={`relative ${className}`}>
             {/* Canvas */}
-            <div className={`relative rounded-xl overflow-hidden border-2 border-dashed ${isDrawing ? 'border-amber-400' : 'border-gray-200'
+            <div className={`relative rounded-xl overflow-hidden border-2 ${isDrawing ? 'border-amber-400' : 'border-gray-200'
                 } transition-colors bg-gradient-to-b from-amber-50/30 to-white`}>
                 <canvas
                     ref={canvasRef}
