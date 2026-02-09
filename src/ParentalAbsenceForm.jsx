@@ -371,7 +371,7 @@ export default function ParentalAbsenceForm() {
               i.onerror = () => res(null);
               i.src = sigDataUrl;
             });
-            const maxW = 55, maxH = 22;
+            const maxW = 50, maxH = 14;
             let imgW = maxW, imgH = maxH;
             if (sigImg && sigImg.naturalWidth && sigImg.naturalHeight) {
               const ar = sigImg.naturalWidth / sigImg.naturalHeight;
@@ -384,7 +384,7 @@ export default function ParentalAbsenceForm() {
               }
             }
             const imgX = sigX + (55 - imgW) / 2;
-            doc.addImage(sigDataUrl, 'PNG', imgX, sigLineY - imgH - 1, imgW, imgH);
+            doc.addImage(sigDataUrl, 'PNG', imgX, sigLineY - imgH, imgW, imgH);
           }
         } catch (e) {
           console.warn('Failed to embed signature:', e);

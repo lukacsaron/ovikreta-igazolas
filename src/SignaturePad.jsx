@@ -55,45 +55,48 @@ export default function SignaturePad({ onSignatureChange, className = '', compac
         };
     }, []);
 
+    const isDrawingRef = useRef(false);
+
     const startStroke = useCallback((e) => {
         e.preventDefault();
         const pos = getPos(e);
-        const ctx = canvasRef.current.getContext('2d');
-        ctx.setLineDash([]);
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.strokeStyle = '#3b2d8b';
-        ctx.lineWidth = 2.5;
+        isDrawingRef.current = true;
         setIsDrawing(true);
         lastPointRef.current = pos;
         pointsRef.current = [pos];
     }, [getPos]);
 
     const draw = useCallback((e) => {
-        if (!isDrawing) return;
+        if (!isDrawingRef.current) return;
         e.preventDefault();
 
-        const ctx = canvasRef.current.getContext('2d');
         const pos = getPos(e);
-        const last = lastPointRef.current;
+        pointsRef.current.push(pos);
+        lastPointRef.current = pos;
 
-        // Ensure solid strokes (canvas ctx resets on resize)
+        // Redraw entire current stroke as a single continuous path
+        const ctx = canvasRef.current.getContext('2d');
+        const points = pointsRef.current;
+        if (points.length < 2) return;
+
+        // Clear and redraw would lose previous strokes, so we use an image buffer
+        // Instead, draw only the latest segment connecting to the path
+        const prev = points[points.length - 2];
+        const curr = points[points.length - 1];
+        const mid = { x: (prev.x + curr.x) / 2, y: (prev.y + curr.y) / 2 };
+
         ctx.setLineDash([]);
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
         ctx.strokeStyle = '#3b2d8b';
-        ctx.lineWidth = 2.5;
+        ctx.lineWidth = 3;
 
-        // Quadratic Bézier for smooth curves
-        const mid = { x: (last.x + pos.x) / 2, y: (last.y + pos.y) / 2 };
+        // Draw a line directly from previous point to current — no gaps
         ctx.beginPath();
-        ctx.moveTo(last.x, last.y);
-        ctx.quadraticCurveTo(last.x, last.y, mid.x, mid.y);
+        ctx.moveTo(prev.x, prev.y);
+        ctx.lineTo(curr.x, curr.y);
         ctx.stroke();
-
-        lastPointRef.current = pos;
-        pointsRef.current.push(pos);
-    }, [isDrawing, getPos]);
+    }, [getPos]);
 
     const endStroke = useCallback(() => {
         if (!isDrawing) return;
